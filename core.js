@@ -8,6 +8,12 @@ function Node(value) {
   this.right = null;
   this.parent = null;
   this.color = RED;
+
+  this.width = 0;
+  // 根节点到最右边节点
+  this.leftWidth = 0;
+  this.rightWidth = 0;
+  this.offset = radius;
 }
 
 
@@ -73,6 +79,7 @@ function remove(node, value, selfBalance) {
   return node;
 }
 
+// 输入数组
 var array;
 
 /**
@@ -136,7 +143,7 @@ function createBTree() {
 function insertBTree() {
   let input = document.getElementById('input0')
   let array = input.value.split(',');
-  this.array.put(array);
+  array.forEach(v => this.array.push(v));
   generateTree();
 }
 
@@ -149,8 +156,9 @@ function generateTree() {
     let num = parseInt(array[0]);
     if (!isNaN(num)) {
       root = new Node(array[0]);
-      insertTree(0, root);
+      insertBiTree(0, root);
     }
+    // root = generate()
   }
   showTree();
 }
@@ -160,28 +168,59 @@ function generateTree() {
  * @param index
  * @param node
  */
-function insertTree(index, node) {
+function insertBiTree(index, node) {
   let leftIndex = index * 2 + 1;
   let rightIndex = leftIndex + 1;
   let num;
-  if (leftIndex < array.length) {
-    num = parseInt(array[leftIndex]);
-    if (!isNaN(num)) {
-      let left = new Node(num);
-      node.left = left;
-      insertTree(leftIndex, left);
-    }
+  if (leftIndex >= array.length)
+    return
+  num = parseInt(array[leftIndex]);
+  if (!isNaN(num)) {
+    let left = new Node(num);
+    node.left = left;
+    insertBiTree(leftIndex, left);
   }
 
-  if (rightIndex < array.length) {
-    num = parseInt(array[rightIndex]);
-    if (!isNaN(num)) {
-      let right = new Node(num);
-      node.right = right;
-      insertTree(rightIndex, right);
-    }
+  if (leftIndex >= array.length)
+    return
+  num = parseInt(array[rightIndex]);
+  if (!isNaN(num)) {
+    let right = new Node(num);
+    node.right = right;
+    insertBiTree(rightIndex, right);
   }
   node.height = Math.max(getHeight(node.left), getHeight(node.right)) + 1;
+}
+
+function generate() {
+  let nodes = new Array(array.length);
+  for (let i = 0; i < array.length; i++) {
+    let num = parseInt(array[i]);
+    if (!isNaN(num)) {
+      nodes[i] = new Node(num);
+    }
+  }
+  for (let i = 0; i < array.length / 2 - 1; i++) {
+    let leftIndex = i * 2 + 1;
+    let rightIndex = leftIndex + 1;
+    let node = nodes[i];
+    if (node) {
+      node.left = nodes[leftIndex];
+      node.right = nodes[rightIndex];
+    }
+  }
+  // 判断最后一个根结点：因为最后一个根结点可能没有右结点，所以单独拿出来处理
+  let lastIndex = array.length / 2 - 1;
+  let lastNode = nodes[lastIndex];
+  if (lastNode) {
+    // 左结点
+    lastNode.left = nodes[lastIndex * 2 + 1];
+    // 右结点，如果数组的长度为奇数才有右结点
+    if (array.length % 2 === 1) {
+      lastNode.right = nodes[lastIndex * 2 + 2];
+    }
+  }
+  return nodes[0]
 }
 
 
@@ -464,7 +503,7 @@ function RBTRemove(node, value) {
       let value = child.value;
       if (node.left === child) {
         node.left = null;
-      }else {
+      } else {
         node.right = null;
       }
       child.parent = null;
@@ -611,17 +650,18 @@ function linkParent(node, parent) {
 /**
  * 渲染
  */
-function showTree(color) {
+function showTree(color = false) {
   initCanvas();
   clear();
-  render(root, canvas.width / 2, 10 + raduis, color);
+  measure2(root);
+  render2(root, canvas.width / 2, 10 + radius, color);
 }
 
-var raduis = 20
+var radius = 20;
 // 兄弟节点间距
-var spacing = 5
+var spacing = radius;
 // 每一层高度
-var height = 40
+var height = radius * 3;
 
 var padding = 20;
 
@@ -637,8 +677,8 @@ function initCanvas() {
   canvas = document.getElementById('canvas');
   const h = getHeight(root);
   let leaf = Math.pow(2, h - 1);
-  const cvHeight = h * raduis * 2 + (h - 1) * height + padding * 2;
-  const cvWidth = leaf * (raduis + spacing) * 2 + padding * 2;
+  const cvHeight = h * height + radius * 2 + padding * 2;
+  const cvWidth = (leaf * 2 - 1) * radius * 2 + padding * 2;
   canvas.style.height = cvHeight + 'px';
   canvas.style.width = cvWidth + 'px';
   canvas.height = cvHeight;
@@ -655,41 +695,134 @@ function clear() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
 
-function render(node, x, y, color) {
-  if (node != null) {
-    ctx.beginPath();
-    ctx.arc(x, y, raduis, 0, 2 * Math.PI)
-    ctx.closePath();
-    ctx.stroke();
-    if (color) {
-      ctx.fillStyle = node.color === RED ? 'red' : 'black';
-      ctx.fill('nonzero');
-      ctx.fillStyle = 'white';
-    } else {
-      ctx.fillStyle = 'red';
-    }
-    // 最大叶子节点数，即最后一层可容纳的最大节点数2^h-1
-    // ctx.fillStyle = RED;
-    ctx.fillText(node.value.toString(), x, y);
-    let leaf = Math.pow(2, node.height - 1);
-    let w = leaf * (raduis + spacing) / 2;
-    if (node.left != null) {
-      let lx = x - w;
-      let ly = y + raduis * 2 + height;
-      ctx.beginPath();
-      ctx.moveTo(x, y + raduis);
-      ctx.lineTo(lx, ly - raduis);
-      ctx.stroke();
-      render(node.left, lx, ly, color);
-    }
-    if (node.right != null) {
-      let rx = x + w;
-      let ry = y + raduis * 2 + height;
-      ctx.beginPath();
-      ctx.moveTo(x, y + raduis);
-      ctx.lineTo(rx, ry - raduis);
-      ctx.stroke();
-      render(node.right, rx, ry, color);
-    }
+function calOffset(node, offset) {
+  if (node == null) {
+    return 0;
+  }
+  let childOffset = radius;
+  if (node.left && node.right) {
+    childOffset *= 2;
+  }
+
+  if (node.left) {
+    offset += calOffset(node.left, -childOffset)
   }
 }
+
+// 1,2,null,3,null,null,null,4,null,null,null,null,null,null,null,5
+// 1,2,3,null,4,5,6,null,null,null,7,8,9
+// 1,2,3,null,4,5,6,null,null,null,7,8
+// 1,2,3,4,null,5,null,null,6,null,null,7,null,null,null,null,null,null,8,null,null,null,null,9
+// 1,2,3,null,5,6,null,null,null,null,11,12
+// 1,2,null,4,5,null,null,8,9,10,11
+// 平衡宽度
+function measure(node) {
+  if (node == null) {
+    return;
+  }
+  let width = radius * 2;
+  if (!node.left && !node.right) {
+    node.width = width;
+    return;
+  }
+  // 左右子树宽度
+  let leftWidth = 0;
+  let rightWidth = 0;
+  // 左子树应该偏移它右子树的宽度
+  let leftOffset = radius;
+  let rightOffset = radius;
+  if (node.left) {
+    measure(node.left);
+    leftWidth = node.left.width;
+    width -= radius;
+    if (node.left.right) {
+      // node.left.offset - radius表示lr子树根节点相对于
+      leftOffset = node.left.right.width + node.left.offset - radius;
+    }
+  }
+  if (node.right) {
+    measure(node.right);
+    rightWidth = node.right.width;
+    width -= radius;
+    if (node.right.left) {
+      rightOffset = node.right.left.width + node.right.offset - radius;
+    }
+  }
+  width += leftWidth + rightWidth;
+  node.offset = Math.max(leftOffset, rightOffset);
+  // 这里要加上由于偏移子树导致双亲扩大的width
+  width += Math.abs(leftOffset - rightOffset);
+
+  if (node.left && node.right) {
+    // 两个兄弟节点的间隔
+    width += spacing;
+    node.offset += spacing / 2;
+  }
+  node.width = width;
+}
+
+function measure2(node) {
+  if (node == null) {
+    return 0;
+  }
+  // measure2(node.left, radius);
+  // measure2(node.right, radius);
+  // let addition = Math.max(measure2(node.left, radius), measure2(node.right, radius));
+  node.offset += measure2(node.left, radius) + measure2(node.right, radius);
+  // if (node.left) {
+  //   node.left.offset += addition/2;
+  // }
+  // if (node.right) {
+  //   node.right.offset += addition/2;
+  // }
+  if (node.left && node.right) {
+    return radius;
+  } else {
+    return 0;
+  }
+}
+
+
+function render2(node, x, y, color = false) {
+  if (node == null) {
+    return;
+  }
+  if (node.left != null) {
+    let offset = node.left.width / 2 + node.offset;
+    let lx = x - node.offset;
+    let ly = y + height;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(lx, ly);
+    ctx.stroke();
+    render2(node.left, lx, ly, color);
+  }
+  if (node.right != null) {
+    let offset = node.right.width / 2 + node.offset;
+    let rx = x + node.offset;
+    let ry = y + height;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(rx, ry);
+    ctx.stroke();
+    render2(node.right, rx, ry, color);
+  }
+  console.log("value:" + node.value + " x:" + (x - 160));
+  ctx.beginPath();
+  ctx.arc(x, y, radius, 0, 2 * Math.PI)
+  ctx.closePath();
+  if (color) {
+    ctx.fillStyle = node.color === RED ? 'red' : 'black';
+    ctx.fill('nonzero');
+    ctx.fillStyle = 'white';
+  } else {
+    ctx.fillStyle = 'white';
+    ctx.fill('nonzero');
+    ctx.fillStyle = 'red';
+  }
+  ctx.stroke();
+  // 最大叶子节点数，即最后一层可容纳的最大节点数2^h-1
+  // ctx.fillStyle = RED;
+  ctx.fillText(node.value.toString(), x, y);
+}
+

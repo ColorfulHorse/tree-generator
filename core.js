@@ -182,7 +182,7 @@ function showTree(color = false) {
   measure(root);
   initCanvas();
   clear();
-  render2(root, canvas.width / 2, 10 + radius, color);
+  render(root, canvas.width / 2, 10 + radius, color);
 }
 
 // 节点半径
@@ -252,20 +252,17 @@ function measure(node) {
     node.width = radius * 2;
     return;
   }
-
-  // TODO 此树过多冗余空间 1,2,3,4,,,,6,7,,,,,,,10,11,12,13,,,,,,,,,,,,,18,19,20,21,22,23,24,25
-  // TODO 对比 leetcode [1,2,3,4,null,null,null,6,7,10,11,12,13,18,19,20,21,22,23,24,25]
   measure(node.left);
   measure(node.right);
 
-  // 记录该子树是否为单链表
-  if (!node.left && !node.right) {
-    node.isLinkedList = true;
-  } else if (!node.right) {
-    node.isLinkedList = node.left.isLinkedList;
-  } else if (!node.left) {
-    node.isLinkedList = node.right.isLinkedList;
-  }
+  // // 记录该子树是否为单链表
+  // if (!node.left && !node.right) {
+  //   node.isLinkedList = true;
+  // } else if (!node.right) {
+  //   node.isLinkedList = node.left.isLinkedList;
+  // } else if (!node.left) {
+  //   node.isLinkedList = node.right.isLinkedList;
+  // }
 
   let leftWidth = getWidth(node.left);
   let rightWidth = getWidth(node.right);
@@ -294,22 +291,6 @@ function getWidth(node) {
   return node ? node.width : 0;
 }
 
-function getFullWidth(node) {
-  if (!node) {
-    return 0;
-  }
-  let leaf = Math.pow(2, node.height - 1);
-  return leaf * radius * 2;
-}
-
-function getRealWidth(node) {
-  return node ? node.realWidth : 0;
-}
-
-function isLeaf(node) {
-  if (!node) return true;
-  return !node.left && !node.right;
-}
 
 /**
  * 该子树是否为单链表
@@ -324,7 +305,7 @@ function isLinkedList(node) {
 }
 
 
-function render2(node, x, y, color = false) {
+function render(node, x, y, color = false) {
   if (node == null) {
     return;
   }
@@ -336,7 +317,7 @@ function render2(node, x, y, color = false) {
     ctx.moveTo(x, y);
     ctx.lineTo(lx, ly);
     ctx.stroke();
-    render2(node.left, lx, ly, color);
+    render(node.left, lx, ly, color);
   }
   if (node.right != null) {
     let offset = node.right.width / 2;
@@ -346,7 +327,7 @@ function render2(node, x, y, color = false) {
     ctx.moveTo(x, y);
     ctx.lineTo(rx, ry);
     ctx.stroke();
-    render2(node.right, rx, ry, color);
+    render(node.right, rx, ry, color);
   }
   ctx.beginPath();
   ctx.arc(x, y, radius, 0, 2 * Math.PI)

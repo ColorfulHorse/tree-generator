@@ -11,7 +11,6 @@ function Node(value) {
 
   this.isLinkedList = false;
   this.width = 0;
-  this.realWidth = 0;
   this.offset = 0;
 }
 

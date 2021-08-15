@@ -179,10 +179,7 @@ function removeRBTree() {
  * 渲染
  */
 function showTree(color = false) {
-  measure3(root);
-  if (root.height >=7) {
-    console.log("height:"+root.height+"====mixTotal:"+mixTotal);
-  }
+  measure(root);
   initCanvas();
   clear();
   render2(root, canvas.width / 2, 10 + radius, color);
@@ -239,6 +236,7 @@ function clear() {
 // 1,2,3,4,5,null,null,6,7,8,9,null,null,null,null,10,11,12,13,14,15,16,17,null,null,null,null,null,null,null,null,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33
 
 let mixTotal = 0;
+
 /**
  * 测量
  * @param node
@@ -272,8 +270,9 @@ function measure(node) {
   let leftWidth = getWidth(node.left);
   let rightWidth = getWidth(node.right);
 
-  if(!node.left || !node.right) {
-    node.width = leftWidth +rightWidth;
+  if (!node.left || !node.right) {
+    // 一边子树为空时丢弃空子树空白空间
+    node.width = leftWidth + rightWidth;
   } else {
     // 左右子树宽度
     let leftWidth = getWidth(node.left);
@@ -282,129 +281,13 @@ function measure(node) {
     let childSpace = Math.max(rightWidth, leftWidth);
     // 左右子树高度不相等时，允许它们有一部分空白空间重合，更加紧凑
     let mixWidth = Math.abs(leftWidth - rightWidth) / 2;
-    // if (isLeaf(node.left) || isLeaf(node.right)){
-    //   mixWidth*=2;
-    // }
-    // console.log("mix width:"+mixWidth);
     mixTotal += mixWidth;
     node.width = childSpace * 2 - mixWidth;
     node.offset = childSpace / 2 - mixWidth / 2;
   }
-}
-
-
-function measure3(node) {
-  mixTotal = 0;
-  if (node == null) {
-    return;
-  }
-  if (!node.left && !node.right) {
-    node.isLinkedList = true;
-    node.width = radius * 2;
-    return;
-  }
-
-  // TODO 此树过多冗余空间 1,2,3,4,,,,6,7,,,,,,,10,11,12,13,,,,,,,,,,,,,18,19,20,21,22,23,24,25
-  // TODO 对比 leetcode [1,2,3,4,null,null,null,6,7,10,11,12,13,18,19,20,21,22,23,24,25]
-  measure3(node.left);
-  measure3(node.right);
-
-  // 记录该子树是否为单链表
-  if (!node.left && !node.right) {
-    node.isLinkedList = true;
-  } else if (!node.right) {
-    node.isLinkedList = node.left.isLinkedList;
-  } else if (!node.left) {
-    node.isLinkedList = node.right.isLinkedList;
-  }
-
-  // 左右子树宽度
-  let leftWidth = getWidth(node.left);
-  let rightWidth = getWidth(node.right);
-  if(!node.left || !node.right) {
-    node.width = leftWidth +rightWidth;
-  }else {
-    // 当前为满二叉树时子树应该占据的空间
-    let childSpace = Math.max(rightWidth, leftWidth);
-    let factor = getHeight(node.left) - getHeight(node.right);
-    node.width = childSpace * 2;
-    node.offset = childSpace / 2;
-    let mixWidth = 0;
-    if (factor > 0) {
-      let leftSpace = leftWidth / (Math.pow(2, getHeight(node.right)));
-      let rightSpace = rightWidth / (Math.pow(2, getHeight(node.right))) + (childSpace - rightWidth) / 2;
-      mixWidth = leftSpace + rightSpace - radius * 2;
-    } else if (factor < 0) {
-      let rightSpace = rightWidth / (Math.pow(2, getHeight(node.left)));
-      let leftSpace = leftWidth / (Math.pow(2, getHeight(node.left))) + (childSpace - leftWidth) / 2;
-      mixWidth = leftSpace + rightSpace - radius * 2;
-    }
-    // console.log("mix width:"+mixWidth);
-    mixTotal+=mixWidth;
-    node.width -= mixWidth;
-    node.offset -= mixWidth / 2;
-  }
-    // if (factor > 0) {
-    //   if (node.left)
-    //   let minHeight = Math.min(getHeight(node.left), getHeight(node.right)) + 1;
-    //   let space = Math.pow(2, minHeight - 1) * radius +radius;
-    //   // if (!isLeaf(node.left) || !isLeaf(node.left)) {
-    //   //   space +=radius;
-    //   // }
-    //   let mixWidth = childSpace - space;
-    //   let mixWidth = childSpace - rightWidth/2 + childSpace - leftWidth/2;
-    //   node.width -= mixWidth;
-    //   node.offset -= mixWidth/2;
-    // }
-
-  // }
-
-
-  // 左右子树高度不同时缩减空间，但是要保证它们不重叠，只需要考虑左右子树
-  // let factor = Math.abs(getHeight(node.left) - getHeight(node.right));
-}
-
-function measure2(node) {
-  if (node == null) {
-    return;
-  }
-  if (!node.left && !node.right) {
-    node.isLinkedList = true;
-    node.width = radius * 2;
-    return;
-  }
-
-  // if ((node.left && isLeaf(node.left) && !node.right)||(node.right && isLeaf(node.right) && !node.left)) {
-  //   node.width = radius*2 + spacing;
-  //   node.offset = spacing/2;
-  //   return;
-  // }
-  // TODO 此树过多冗余空间 1,2,3,4,,,,6,7,,,,,,,10,11,12,13,,,,,,,,,,,,,18,19,20,21,22,23,24,25
-  // TODO 对比 leetcode [1,2,3,4,null,null,null,6,7,10,11,12,13,18,19,20,21,22,23,24,25]
-  measure2(node.left);
-  measure2(node.right);
-  let leftWidth = getWidth(node.left);
-  let rightWidth = getWidth(node.right);
-  let childSpace = Math.max(rightWidth, leftWidth);
-  node.width = childSpace * 2;
-  node.offset = childSpace/2;
-    // if (node.left && node.right) {
-    //   node.width += spacing;
-    //   node.offset += spacing / 2;
-    // }
-
-
-  // node.width = leftWidth +rightWidth;
-  //
-  // if (node.left && node.right) {
-  //   node.offset = node.width/4;
-  // }
-  // if (node.left && node.right) {
-  //   node.width += spacing;
-  //   node.offset += spacing / 2;
-  // }else {
-  //   node.offset += spacing / 2;
-  // }
+  // 兄弟节点加间距
+  node.width += spacing;
+  node.offset += spacing / 2;
 }
 
 function getWidth(node) {
@@ -415,8 +298,8 @@ function getFullWidth(node) {
   if (!node) {
     return 0;
   }
-  let leaf = Math.pow(2, node.height-1);
-  return leaf*radius*2;
+  let leaf = Math.pow(2, node.height - 1);
+  return leaf * radius * 2;
 }
 
 function getRealWidth(node) {
@@ -424,7 +307,7 @@ function getRealWidth(node) {
 }
 
 function isLeaf(node) {
-  if (!node)return true;
+  if (!node) return true;
   return !node.left && !node.right;
 }
 

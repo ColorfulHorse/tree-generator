@@ -9,27 +9,29 @@
 <body>
     <p>输入数字，逗号分隔，空节点用null表示，生成二叉树</p>
     <p>普通二叉树树</p>
-    <input id="input0" type="text" name="输入" value="1,2,3,null,4,5,6,null,null,null,7">
+    <input id="inputBiTree" type="text" name="输入" value="1,2,3,null,4,5,6,null,null,null,7">
     <input type="button" value="添加节点" title="添加节点" onclick="insertBiTree()"/>
     <input type="button" value="重新生成" title="重新生成" onclick="generateBiTree()"/>
     <input type="button" value="随机生成" title="随机生成" onclick="randomBiTree()"/>
 
     <p>输入数字，逗号分隔，生成二叉搜索树</p>
     <p>二叉搜索树</p>
-    <input id="input1" type="text" name="输入" value="9,5,13,3,7,10,16,1,2,6,8,14,15,17,19">
+    <input id="inputBST" type="text" name="输入" value="9,5,13,3,7,10,16,1,2,6,8,14,15,17,19">
     <input type="button" value="添加节点" title="添加节点" onclick="insertBSTree()"/>
     <input type="button" value="重新生成" title="重新生成" onclick="generateBSTree()"/>
     <input type="button" value="移除节点" title="移除节点" onclick="removeBSTree()"/>
+    <input type="button" value="随机生成" title="随机生成" onclick="randomBSTree()"/>
     <input type="button" value="自平衡（转换为AVL）" title="自平衡（转换为AVL）" onclick="BST2AVL()"/>
 
     <p>AVL树</p>
-    <input id="input2" type="text" name="输入" value="9,5,13,3,7,10,16,1,2,6,8,14,15,17,19">
+    <input id="inputAVL" type="text" name="输入" value="9,5,13,3,7,10,16,1,2,6,8,14,15,17,19">
     <input type="button" value="添加节点" title="添加节点" onclick="insertAVL()"/>
     <input type="button" value="重新生成" title="重新生成" onclick="generateAVL()"/>
     <input type="button" value="移除节点" title="移除节点" onclick="removeAVL()"/>
+    <input type="button" value="随机生成" title="随机生成" onclick="randomAVLTree()"/>
 
     <p>红黑树</p>
-    <input id="input3" type="text" name="输入" value="9,5,13,3,7,10,16,1,2,6,8,14,15,17,19">
+    <input id="inputRBT" type="text" name="输入" value="9,5,13,3,7,10,16,1,2,6,8,14,15,17,19">
     <input type="button" value="添加节点" title="添加节点" onclick="insertRBTree()"/>
     <input type="button" value="重新生成" title="重新生成" onclick="generateRBTree()"/>
     <input type="button" value="移除节点" title="移除节点" onclick="removeRBTree()"/>

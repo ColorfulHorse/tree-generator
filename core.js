@@ -52,7 +52,7 @@ function generateBSTree() {
 
 function insertBSTree() {
   let input = document.getElementById('inputBST');
-  let array = input.value.split(',');
+  array = input.value.split(',');
 
   array.forEach(value => {
     let num = parseInt(value);
@@ -115,7 +115,7 @@ function generateAVL() {
 
 function insertAVL() {
   let input = document.getElementById('inputAVL');
-  let array = input.value.split(',');
+  array = input.value.split(',');
 
   for (let i = 0; i < array.length; i++) {
     let num = parseInt(array[i]);
@@ -142,7 +142,6 @@ function removeAVL() {
 }
 
 
-
 // ========================== 红黑树
 
 /**
@@ -158,13 +157,17 @@ function generateRBTree() {
  */
 function insertRBTree() {
   let input = document.getElementById('inputRBT');
-  let array = input.value.split(',');
+  array = input.value.split(',');
 
   for (let i = 0; i < array.length; i++) {
     let num = parseInt(array[i]);
     if (!isNaN(num)) {
       root = RBTreeInsert(root, num);
       root.color = BLACK;
+      let isRB = isRBTree(root);
+      if (!isRB) {
+        console.log("insert value:" + num + "====isRB:"+isRB);
+      }
     }
   }
   showTree(true);
@@ -183,7 +186,12 @@ function removeRBTree() {
         root = null;
         break;
       } else {
-        root = RBTreeRemove(root, num);
+        RBTreeRemove(root, num);
+        root = getRoot(root);
+        let isRB = isRBTree(root);
+        if (!isRB) {
+          console.log("remove value:" + num + "====isRB:"+isRB);
+        }
       }
     }
   }
@@ -198,18 +206,17 @@ function removeRBTree() {
  */
 function showTree(color = false) {
   measure(root);
-  // console.log("mix width:"+mixTotal);
   initCanvas();
   clear();
   render(root, canvas.width / 2, 10 + radius, color);
 
-  measure2(root2);
-  if (root2.height >= 7) {
-    // console.log("height:"+root.height+"====mixTotal:"+mixTotal);
-  }
-  initCanvas2();
-  clear2();
-  render2(root2, canvas2.width / 2, 10 + radius, color);
+  // measure2(root2);
+  // if (root2.height >= 7) {
+  //   // console.log("height:"+root.height+"====mixTotal:"+mixTotal);
+  // }
+  // initCanvas2();
+  // clear2();
+  // render2(root2, canvas2.width / 2, 10 + radius, color);
   // console.log("measure3 width:" + root.width + "=======measure width:" + root2.width);
 }
 
@@ -244,9 +251,9 @@ function initCanvas() {
   canvas.width = cvWidth;
   ctx = canvas.getContext('2d');
   ctx.strokeStyle = '#000';
+  ctx.fillStyle = '#fff';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillStyle = 'red';
   ctx.font = 'bold ' + 20 + 'px serif';
 }
 
@@ -264,7 +271,6 @@ function initCanvas2(canvas) {
   ctx2.strokeStyle = '#000';
   ctx2.textAlign = 'center';
   ctx2.textBaseline = 'middle';
-  ctx2.fillStyle = 'red';
   ctx2.font = 'bold ' + 20 + 'px serif';
 }
 
@@ -374,7 +380,7 @@ function measure(node) {
   if (!node.left || !node.right) {
     node.width = leftWidth + rightWidth;
     node.width += spacing;
-    node.offset += spacing / 2;
+    node.offset = spacing / 2;
   } else {
     // 当前为满二叉树时子树应该占据的空间
     let childSpace = Math.max(rightWidth, leftWidth);
@@ -416,7 +422,7 @@ function measure(node) {
       let fix = fixWidth(fixNode.offset, distance);
       node.width += fix;
       node.offset += fix / 2;
-      console.log("node value: " + node.value + "  distance:" + distance + "  fixWidth:" + fix);
+      // console.log("node value: " + node.value + "  distance:" + distance + "  fixWidth:" + fix);
     }
   }
 }
@@ -470,7 +476,6 @@ function render(node, x, y, color = false) {
     return;
   }
   if (node.left != null) {
-    let offset = node.left.width / 2;
     let lx = x - node.offset;
     let ly = y + height;
     ctx.beginPath();
@@ -480,7 +485,6 @@ function render(node, x, y, color = false) {
     render(node.left, lx, ly, color);
   }
   if (node.right != null) {
-    let offset = node.right.width / 2;
     let rx = x + node.offset;
     let ry = y + height;
     ctx.beginPath();
@@ -586,7 +590,7 @@ function randomSet() {
  * 生成一颗随机排序树
  */
 function randomBSTree() {
-  let input = document.getElementById('inputAVL');
+  let input = document.getElementById('inputBST');
   input.value = randomSet().toString();
   generateBSTree();
 }

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <script type="text/javascript" src="define.js"></script>
     <script type="text/javascript" src="core.js"></script>
+    <script type="text/javascript" src="test.js"></script>
     <title>数组生成二叉树</title>
 </head>
 <body>
@@ -29,6 +30,7 @@
     <input type="button" value="重新生成" title="重新生成" onclick="generateAVL()"/>
     <input type="button" value="移除节点" title="移除节点" onclick="removeAVL()"/>
     <input type="button" value="随机生成" title="随机生成" onclick="randomAVLTree()"/>
+    <input type="button" value="随机移除" title="随机移除" onclick="randomAVLTreeRemove()"/>
 
     <p>红黑树</p>
     <input id="inputRBT" type="text" name="输入" value="9,5,13,3,7,10,16,1,2,6,8,14,15,17,19">
@@ -36,6 +38,7 @@
     <input type="button" value="重新生成" title="重新生成" onclick="generateRBTree()"/>
     <input type="button" value="移除节点" title="移除节点" onclick="removeRBTree()"/>
     <input type="button" value="随机生成" title="随机生成" onclick="randomRBTree()"/>
+    <input type="button" value="随机移除" title="随机移除" onclick="randomRBTreeRemove()"/>
     <canvas id="canvas" style="display: block; margin: 0 auto;"></canvas>
     <canvas id="canvas2" style="display: block; margin: 0 auto;"></canvas>
 </body>

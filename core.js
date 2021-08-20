@@ -571,7 +571,7 @@ function randomBiTree() {
 }
 
 function randomSet() {
-  let count = 100;
+  let count = 200;
   let array = new Array(count);
   let set = new Set();
   while (set.size < count) {

@@ -488,8 +488,10 @@ function fixRBNode(node) {
           parent = leftRotate(parent);
           linkParent(parent, grand);
           break;
-        } else if (isRed(brother.left) && !isRed(brother.right)) {
-          // case2 兄弟节点的左节点为红，右子节点为空，即RL
+        } else if (!isRed(brother.right) && isRed(brother.left)) {
+          // case2 兄弟节点的左节点为红，右子节点为黑色或null，即RL
+          // 19,278,96,158,410,430,484,21,58,70,463,244,20,360,157,427,414,183,47,494,363,355,235,499,483,251,151,356,437,194,55,460,388,186,112,383,416,123,365,472,234,30,81,233,140,169,40,200,381,316,141,445,347,442,230,37,29,267,51,450,111,309,491,243,67,136,145,7,333,45,225,52,217,379,237,425,495,38,187,478,192,134,92,413,350,44,66,156,477,489,10,303,428,314,249,329,373,254,435,288,446,227,139,80,443,224,305,452,173,95,239,348,342,130,193,103,397,464,159,257,432,189,291,93,79,202,161,266,188,170,175,480,2,469,221,148,63,150,75,401,208,105,106,466,496,39,487,48,354,68,296,242,54,184,28,332,290,84,3,334,143,31,100,135,252,481,176,284,285,328,474,318,485,73,399,400,322,128,324,441,215,392,18,206,289,255,433,281,222,431,325,180,246,313,114,144,179,359,395,265
+          // remove 334,342
           //    红/黑        红/黑            红/黑
           //     /\          / \   右旋兄弟    / \
           //   del 黑   =>  del 红    =>     del 黑   =>  转为case1 RR
@@ -527,7 +529,7 @@ function fixRBNode(node) {
       if (!isRed(brother)) {
         // 删除节点的兄弟节点为黑色
         if (isRed(brother.left)) {
-          // case5 兄弟节点的左子节点为红，右节点为红或空，即LL
+          // case5 兄弟节点的左子节点为红，右节点为任意颜色，即LL
           brother.color = parent.color;
           // 父节点的颜色给到兄弟节点，父节点和兄弟节点的右子节点都变黑色，左旋
           parent.color = BLACK;
@@ -535,8 +537,8 @@ function fixRBNode(node) {
           parent = rightRotate(parent);
           linkParent(parent, grand);
           break;
-        } else if (isRed(brother.right) && !isRed(brother.left)) {
-          // case6 兄弟节点的右节点为红，左子节点为空，即RL
+        } else if (!isRed(brother.left) && isRed(brother.right)) {
+          // case6 兄弟节点的右节点为红，左子节点为黑色或null，即LR
           brother.right.color = BLACK;
           brother.color = RED;
           brother = leftRotate(brother);

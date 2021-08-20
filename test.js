@@ -37,7 +37,7 @@ function isAVL(node) {
   if (!node) {
     return true;
   }
-  let res;
+  let res = true;
   if (node.left) {
     res = node.left.value < node.value;
   }

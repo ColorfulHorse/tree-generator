@@ -7,9 +7,10 @@ function Node(value) {
   this.left = null;
   this.right = null;
   this.parent = null;
+  // 红黑树节点颜色
   this.color = RED;
 
-  this.isLinkedList = false;
+  // 绘制用
   this.width = 0;
   this.offset = 0;
 }
@@ -35,10 +36,10 @@ function getBalanceFactor(node) {
  * @returns {*}
  */
 function getBSTreeMin(node) {
-  if (node == null || node.left == null) {
-    return node;
+  while (node.left) {
+    node = node.left;
   }
-  return getBSTreeMin(node.left);
+  return node;
 }
 
 /**
@@ -47,18 +48,22 @@ function getBSTreeMin(node) {
  * @returns {*}
  */
 function rightRotate(node) {
-  //2,3,4,5,8,9,13
-  let res = node.left;
-  node.left = res.right;
+  //      P      R
+  //     /      / \
+  //    R      C1  P
+  //   / \        /
+  //  C1 C2      C2
+  let r = node.left;
+  node.left = r.right;
   if (node.left != null) {
     node.left.parent = node;
   }
-  res.right = node;
-  res.right.parent = res;
-  res.parent = null;
+  r.right = node;
+  r.right.parent = r;
+  r.parent = null;
   node.height = Math.max(getHeight(node.left), getHeight(node.right)) + 1;
-  res.height = Math.max(getHeight(res.left), getHeight(res.right)) + 1;
-  return res;
+  r.height = Math.max(getHeight(r.left), getHeight(r.right)) + 1;
+  return r;
 }
 
 /**
@@ -67,6 +72,11 @@ function rightRotate(node) {
  * @returns {*}
  */
 function leftRotate(node) {
+  //     P         R
+  //      \       / \
+  //       R     P  C2
+  //      / \     \
+  //     C1 C2     C1
   let res = node.right;
   node.right = res.left;
   if (node.right != null) {
@@ -104,16 +114,18 @@ function balanceSelf(node) {
     node.right = rightRotate(node.right);
     node = leftRotate(node);
   }
-  return node
+  return node;
 }
 
 
 /**
- * 普通二叉树插入节点
- * @param index
- * @param node
+ * 数组转二叉树
+ * @param array
+ * @param index 当前节点下标
+ * @param node 当前节点
  */
-function BiTreeInsert(index, node) {
+function BiTreeInsert(array, index, node) {
+  // 左右子节点下标
   let leftIndex = index * 2 + 1;
   let rightIndex = leftIndex + 1;
   let num;
@@ -123,7 +135,7 @@ function BiTreeInsert(index, node) {
   if (!isNaN(num)) {
     let left = new Node(num);
     node.left = left;
-    BiTreeInsert(leftIndex, left);
+    BiTreeInsert(array, leftIndex, left);
   }
 
   if (leftIndex >= array.length)
@@ -132,8 +144,9 @@ function BiTreeInsert(index, node) {
   if (!isNaN(num)) {
     let right = new Node(num);
     node.right = right;
-    BiTreeInsert(rightIndex, right);
+    BiTreeInsert(array, rightIndex, right);
   }
+  // 计算高度
   node.height = Math.max(getHeight(node.left), getHeight(node.right)) + 1;
 }
 
@@ -156,6 +169,7 @@ function BSTreeInsert(node, value, selfBalance) {
   }
   // 重新计算高度，递归自底向上
   node.height = Math.max(getHeight(node.left), getHeight(node.right)) + 1;
+  // AVL树平衡用
   if (selfBalance) {
     node = balanceSelf(node)
   }
@@ -178,20 +192,17 @@ function BSTreeRemove(node, value, selfBalance) {
   } else if (value > node.value) {
     node.right = BSTreeRemove(node.right, value, selfBalance);
   } else {
+    // 当前节点为待删除节点
     if (node.left == null && node.right == null) {
       return null;
-    } else if (node.left == null) {
-      node = node.right;
-    } else if (node.right == null) {
-      node = node.left;
+    } else if (node.left == null || node.right == null) {
+      return node.left == null ? node.right : node.left;
     } else {
-      // 左右子节点都不为空，找到右子节点的最小叶子节点
+      // 左右子节点都不为空，找到右子节点的最小子节点
       let min = getBSTreeMin(node.right);
-      let right = BSTreeRemove(node.right, min.value, selfBalance);
-      min.left = node.left;
-      min.right = right;
-      node.left = node.right = null;
-      node = min;
+      // 删除最小子节点
+      node.right = BSTreeRemove(node.right, min.value, selfBalance);
+      node.value = min.value;
     }
   }
   node.height = Math.max(getHeight(node.left), getHeight(node.right)) + 1;
@@ -206,6 +217,13 @@ function isRed(node) {
   if (node == null)
     return false;
   return node.color === RED;
+}
+
+function getRoot(node) {
+  if (node.parent) {
+    return node.parent;
+  }
+  return node;
 }
 
 /**
@@ -227,6 +245,7 @@ function RBTreeInsert(node, value) {
     node.right.parent = node;
   }
   node.height = Math.max(getHeight(node.left), getHeight(node.right)) + 1;
+  // 将当前节点作为祖父节点检查是否需要自平衡操作
   if (isRed(node.left) && isRed(node.right)) {
     // 插入节点的父节点为红色，父节点的兄弟节点也为红色，
     // 也就是 祖父节点->父节点->插入节点 = 黑->红->红，将三层颜色变为 红->黑->红 即可
@@ -286,46 +305,42 @@ function RBTreeRemove(node, value) {
   } else {
     // 该节点为要删除的节点
     if (node.left == null && node.right == null) {
-      // 删除节点没有子节点
-      let last = fixRBNode(node);
-      last.color = BLACK;
+      // case1 删除节点为叶子节点
+      fixRBNode(node);
       // 修复完成后再删除节点
-      if (node.parent.left === node) {
+      if (node === node.parent.left) {
         node.parent.left = null;
       } else {
         node.parent.right = null;
       }
       node.parent = null;
     } else if (node.left == null || node.right == null) {
-      // 如果删除节点有一个子节点，那么删除节点必然为黑色，子节点必然为红（红节点必有两个黑子节点），删除本节点相当于删除它的红色子节点
+      // case2 删除节点有一个子节点
       //       -
       //     /    \
-      //  del(黑)  -
+      //   del     -
       //   /      / \
-      //  红      -   -
+      // child   -   -
+      // 删除本节点相当于删除它的子节点child
       let child = node.left == null ? node.right : node.left;
-      let value = child.value;
-      if (node.left === child) {
-        node.left = null;
-      } else {
-        node.right = null;
-      }
-      child.parent = null;
-      // RBTRemove(child, child.value);
-      node.value = value;
+      node.value = child.value;
+      // 转为case1
+      RBTreeRemove(child, child.value);
     } else {
-      // 删除节点有两个子节点，找到右子节点的最小叶子节点（后继）
+      // case3 删除节点有两个子节点，找到右子节点的最小叶子节点（后继）
       //       -
       //     /    \
       //   del     -
       //   / \    / \
       //  -   -  -   -
       //     /
-      //    -  <- 相当于删除这个节点
+      //   child  <- 相当于删除这个节点
+      //     \
+      //      -
       let min = getBSTreeMin(node.right);
-      let value = min.value;
+      node.value = min.value;
+      // 转为case1或case2
       RBTreeRemove(min, min.value);
-      node.value = value;
     }
   }
   node.height = Math.max(getHeight(node.left), getHeight(node.right)) + 1;
@@ -336,7 +351,7 @@ function RBTreeRemove(node, value) {
  * @param node
  * @returns {*}
  */
-function fixRBNode(node) {
+function fixRBNode2(node) {
   let parent = node.parent;
   if (parent == null) {
     return node;
@@ -359,6 +374,7 @@ function fixRBNode(node) {
         brother.left.color = RED;
         parent = leftRotate(parent);
         linkParent(parent, grand);
+        return parent;
       } else {
         // 删除节点的兄弟节点为黑色，此时若兄弟节点有子节点，子节点都为红
         if (brother.left == null && brother.right == null) {
@@ -367,7 +383,7 @@ function fixRBNode(node) {
           //     /\    =>    / \
           //   del 黑       del 红
           brother.color = RED;
-          return fixRBNode(parent);
+          return fixRBNode2(parent);
         } else if (brother.right == null) {
           // 兄弟节点的右节点为空，左子节点为红，即RL
           //    红/黑        红/黑            红/黑            黑           红/黑        红/黑
@@ -385,19 +401,21 @@ function fixRBNode(node) {
           brother.right.color = BLACK;
           parent = leftRotate(parent);
           linkParent(parent, grand);
+          return parent;
         } else {
           // 兄弟节点的右节点为红，左节点为红或空，即RR
           //      红/黑            黑             红/黑           红/黑
           //       / \           /  \            /  \           /  \
           //      del 黑   =>   del 红/黑   =>   黑   黑   =>    黑   黑
           //         /  \           /  \      /   \             \
-          //    红/null  红      红/null 黑   del 红/null       红/null
+          //     红/null 红      红/null 黑   del 红/null       红/null
           brother.color = parent.color;
           // 父节点的颜色给到兄弟节点，父节点和兄弟节点的右子节点都变黑色，左旋
           parent.color = BLACK;
           brother.right.color = BLACK;
           parent = leftRotate(parent);
           linkParent(parent, grand);
+          return parent;
         }
       }
     } else {
@@ -409,12 +427,13 @@ function fixRBNode(node) {
         brother.right.color = RED;
         parent = rightRotate(parent);
         linkParent(parent, grand);
+        return parent;
       } else {
         // 删除节点的兄弟节点为黑色，此时若兄弟节点有子节点，子节点都为红
         if (brother.left == null && brother.right == null) {
           // 兄弟节点无子节点
           brother.color = RED;
-          return fixRBNode(parent);
+          return fixRBNode2(parent);
         } else if (brother.left == null) {
           // 兄弟节点的左节点为空，右子节点为红，即LR
           brother.right.color = BLACK;
@@ -427,14 +446,16 @@ function fixRBNode(node) {
           brother.left.color = BLACK;
           parent = rightRotate(parent);
           linkParent(parent, grand);
+          return parent;
         } else {
           // 兄弟节点的左节点为红，右节点为红或空，即LL
           brother.color = parent.color;
           // 父节点的颜色给到兄弟节点，父节点和兄弟节点的右子节点都变黑色，左旋
           parent.color = BLACK;
-          brother.right.color = BLACK;
+          brother.left.color = BLACK;
           parent = rightRotate(parent);
           linkParent(parent, grand);
+          return parent;
         }
       }
     }
@@ -442,9 +463,110 @@ function fixRBNode(node) {
   return node;
 }
 
+/**
+ * 删除前修复
+ * @param node
+ */
+function fixRBNode(node) {
+  while (node.parent != null && node.color === BLACK) {
+    let parent = node.parent;
+    let grand = parent.parent;
+    let brother;
+    if (node.value < parent.value) {
+      // 删除节点为父节点的左子节点
+      brother = parent.right;
+      if (!isRed(brother)) {
+        // 删除节点的兄弟节点为黑色
+        if (isRed(brother.right)) {
+          // case1 兄弟节点的右节点为红，左节点任意颜色，即RR
+          // 向因为左子树删除了黑节点，所以将右子树的红节点拿过来变黑即可
+          //      红/黑            黑             红/黑           红/黑
+          //       / \           /  \            /  \           /  \
+          //      del 黑   =>   del 红/黑   =>   黑   黑   =>    黑   黑
+          //         /  \           /  \      /   \             \
+          //        -   红          -   黑   del    -             -
+          brother.color = parent.color;
+          // 父节点的颜色给到兄弟节点，父节点和兄弟节点的右子节点都变黑色，左旋
+          parent.color = BLACK;
+          brother.right.color = BLACK;
+          parent = leftRotate(parent);
+          linkParent(parent, grand);
+          break;
+        } else if (!isRed(brother.right) && isRed(brother.left)) {
+          // case2 兄弟节点的左节点为红，右子节点为黑色或null，即RL
+          //    红/黑        红/黑            红/黑
+          //     /\          / \   右旋兄弟    / \
+          //   del 黑   =>  del 红    =>     del 黑   =>  转为case1 RR
+          //      /            /                 \
+          //     红            黑                 红
+          brother.left.color = BLACK;
+          brother.color = RED;
+          brother = rightRotate(brother);
+          linkParent(brother, parent);
+        } else if (!isRed(brother.left) && !isRed(brother.right)) {
+          // case3 兄弟节点无子节点或子节点都为黑
+          //    红/黑        红/黑  <- 指定为新的平衡点，然后自底向上修复
+          //     /\    =>    / \
+          //   del 黑       del 红
+          //      / \          / \
+          //     黑  黑        黑  黑
+          brother.color = RED;
+          node = parent;
+        }
+      } else {
+        // case4 兄弟节点为红色，则父节点为黑节点，兄弟节点有两个黑节点
+        //      黑           红              黑
+        //     / \          / \   左旋      / \
+        //   del 红   =>  del 黑    =>     红  黑   =>  转为case1/case2/case3
+        //      / \          / \         / \
+        //     黑  黑        黑  黑      del 黑
+        brother.color = BLACK;
+        parent.color = RED;
+        parent = leftRotate(parent);
+        linkParent(parent, grand);
+      }
+    } else {
+      // 删除节点为父节点的右子节点
+      brother = parent.left;
+      if (!isRed(brother)) {
+        // 删除节点的兄弟节点为黑色
+        if (isRed(brother.left)) {
+          // case5 兄弟节点的左子节点为红，右节点为任意颜色，即LL
+          brother.color = parent.color;
+          // 父节点的颜色给到兄弟节点，父节点和兄弟节点的右子节点都变黑色，左旋
+          parent.color = BLACK;
+          brother.left.color = BLACK;
+          parent = rightRotate(parent);
+          linkParent(parent, grand);
+          break;
+        } else if (!isRed(brother.left) && isRed(brother.right)) {
+          // case6 兄弟节点的右节点为红，左子节点为黑色或null，即LR
+          brother.right.color = BLACK;
+          brother.color = RED;
+          brother = leftRotate(brother);
+          linkParent(brother, parent);
+        } else if (!isRed(brother.left) && !isRed(brother.right)) {
+          // case7 兄弟节点无子节点或子节点都为黑
+          brother.color = RED;
+          node = parent;
+        }
+      } else {
+        // case8 兄弟节点为红色，则父节点为黑节点，兄弟节点有两个黑节点
+        brother.color = BLACK;
+        parent.color = RED;
+        parent = rightRotate(parent);
+        linkParent(parent, grand);
+      }
+    }
+  }
+  // 向上回溯结束时变色
+  node.color = BLACK;
+}
+
+
 function linkParent(node, parent) {
-  if (parent != null) {
-    if (parent.left === node) {
+  if (parent) {
+    if (node.value < parent.value) {
       parent.left = node;
     } else {
       parent.right = node;

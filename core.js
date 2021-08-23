@@ -16,16 +16,6 @@ function generateBiTree() {
       BiTreeInsert(array, 0, root);
     }
   }
-
-
-  root2 = null;
-  if (array.length > 0) {
-    let num = parseInt(array[0]);
-    if (!isNaN(num)) {
-      root2 = new Node(num);
-      BiTreeInsert(array, 0, root2);
-    }
-  }
   showTree();
 }
 
@@ -39,7 +29,7 @@ function insertBiTree() {
   let input = document.getElementById('inputBiTree');
   let array = input.value.split(',');
   array.forEach(v => this.array.push(v));
-  generateBiTree(true);
+  generateBiTree();
 }
 
 
@@ -164,10 +154,6 @@ function insertRBTree() {
     if (!isNaN(num)) {
       root = RBTreeInsert(root, num);
       root.color = BLACK;
-      let isRB = isRBTree(root);
-      if (!isRB) {
-        console.log("insert value:" + num + "====isRB:"+isRB);
-      }
     }
   }
   showTree(true);
@@ -188,10 +174,6 @@ function removeRBTree() {
       } else {
         RBTreeRemove(root, num);
         root = getRoot(root);
-        let isRB = isRBTree(root);
-        if (!isRB) {
-          console.log("remove value:" + num + "====isRB:"+isRB);
-        }
       }
     }
   }
@@ -209,15 +191,6 @@ function showTree(color = false) {
   initCanvas();
   clear();
   render(root, canvas.width / 2, 10 + radius, color);
-
-  // measure2(root2);
-  // if (root2.height >= 7) {
-  //   // console.log("height:"+root.height+"====mixTotal:"+mixTotal);
-  // }
-  // initCanvas2();
-  // clear2();
-  // render2(root2, canvas2.width / 2, 10 + radius, color);
-  // console.log("measure3 width:" + root.width + "=======measure width:" + root2.width);
 }
 
 // 节点半径
@@ -230,18 +203,15 @@ var height = radius * 2 + 30;
 var padding = 20;
 
 var root = null;
-var root2 = null;
 
+var canvas = null;
 var ctx = null;
-var ctx2 = null;
 
 /***
  * 重新设置画布大小
  */
 function initCanvas() {
   canvas = document.getElementById('canvas');
-  // const h = getHeight(root);
-  // let leaf = Math.pow(2, h - 1);
   const cvHeight = (root.height - 1) * height + radius * 2 + padding * 2;
   const cvWidth = root.width + padding * 2;
   canvas.style.height = cvHeight + 'px';
@@ -256,104 +226,15 @@ function initCanvas() {
   ctx.font = 'bold ' + 20 + 'px serif';
 }
 
-function initCanvas2(canvas) {
-  canvas2 = document.getElementById('canvas2');
-  // const h = getHeight(root);
-  // let leaf = Math.pow(2, h - 1);
-  const cvHeight = (root2.height - 1) * height + radius * 2 + padding * 2;
-  const cvWidth = root2.width + padding * 2;
-  canvas2.style.height = cvHeight + 'px';
-  canvas2.style.width = cvWidth + 'px';
-  canvas2.height = cvHeight;
-  canvas2.width = cvWidth;
-  ctx2 = canvas2.getContext('2d');
-  ctx2.strokeStyle = '#000';
-  ctx2.textAlign = 'center';
-  ctx2.textBaseline = 'middle';
-  ctx2.font = 'bold ' + 20 + 'px serif';
-}
-
 function clear() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
 
-function clear2(ctx, canvas) {
-  ctx2.clearRect(0, 0, canvas2.width, canvas2.height);
-}
-
-
-// 1,2,null,3,null,null,null,4,null,null,null,null,null,null,null,5
-// 1,2,3,null,4,5,6,null,null,null,7,8,9
-// 1,2,3,4,null,5,null,null,6,null,null,7,null,null,null,null,null,null,8,null,null,null,null,9
-// 1,2,3,null,5,6,null,null,null,null,11,12
-// 1,2,null,4,5,null,null,8,9,10,11
-// 1,2,3,4,5,null,7,8,9,10,11,null,null,null,12
-// 1,2,3,4,5,6,7,8,9,10,11
-// 1,2,null,3,null,null,null,4,5,null,null,null,null,null,null,null,null,6,7
-// 极度不平衡树
-// 1,2,3,4,5,null,null,6,7,8,9,null,null,null,null,10,11,12,13,14,15,16,17,null,null,null,null,null,null,null,null,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33
-
-// 缩减空间
-let mixTotal = 0;
-
 /**
- * 测量
- * @param node
- * @param height
- */
-function measure2(node) {
-  mixTotal = 0;
-  if (node == null) {
-    return;
-  }
-  if (!node.left && !node.right) {
-    node.isLinkedList = true;
-    node.width = radius * 2;
-    return;
-  }
-
-  // TODO 此树过多冗余空间 1,2,3,4,,,,6,7,,,,,,,10,11,12,13,,,,,,,,,,,,,18,19,20,21,22,23,24,25
-  // TODO 对比 leetcode [1,2,3,4,null,null,null,6,7,10,11,12,13,18,19,20,21,22,23,24,25]
-  measure2(node.left);
-  measure2(node.right);
-
-  // 记录该子树是否为单链表
-  if (!node.left && !node.right) {
-    node.isLinkedList = true;
-  } else if (!node.right) {
-    node.isLinkedList = node.left.isLinkedList;
-  } else if (!node.left) {
-    node.isLinkedList = node.right.isLinkedList;
-  }
-
-  let leftWidth = getWidth(node.left);
-  let rightWidth = getWidth(node.right);
-
-  if (!node.left || !node.right) {
-    node.width = leftWidth + rightWidth;
-    // node.offset = spacing/2;
-  } else {
-    // 当前为满二叉树时子树应该占据的空间
-    let childSpace = Math.max(rightWidth, leftWidth);
-    // 左右子树高度不相等时，允许它们有一部分空白空间重合，更加紧凑
-    let mixWidth = Math.abs(leftWidth - rightWidth) / 2;
-    // if (isLeaf(node.left) || isLeaf(node.right)){
-    //   mixWidth*=2;
-    // }
-    // console.log("mix width:"+mixWidth);
-    node.width = childSpace * 2 - mixWidth;
-    node.offset = childSpace / 2 - mixWidth / 2;
-  }
-  // node.width += spacing;
-  // node.offset += spacing / 2;
-}
-
-/**
- * 测量整个树宽度以及各节点位置
+ * 自底向上测量整个树宽度以及各节点位置
  * @param node
  */
 function measure(node) {
-  mixTotal = 0;
   if (node == null) {
     return;
   }
@@ -362,8 +243,6 @@ function measure(node) {
     node.width = radius * 2;
     return;
   }
-  // TODO 此树过多冗余空间 1,2,3,4,,,,6,7,,,,,,,10,11,12,13,,,,,,,,,,,,,18,19,20,21,22,23,24,25
-  // TODO 对比 leetcode [1,2,3,4,null,null,null,6,7,10,11,12,13,18,19,20,21,22,23,24,25]
   measure(node.left);
   measure(node.right);
 
@@ -406,6 +285,7 @@ function measure(node) {
         fixNode = node.right;
       }
     }
+    console.log("mixWidth: " + mixWidth);
     node.width -= mixWidth;
     node.offset -= mixWidth / 2;
     // 节点之间添加空隙
@@ -417,7 +297,6 @@ function measure(node) {
       let fix = fixWidth(fixNode.offset, distance);
       node.width += fix;
       node.offset += fix / 2;
-      // console.log("node value: " + node.value + "  distance:" + distance + "  fixWidth:" + fix);
     }
   }
 }
@@ -465,7 +344,13 @@ function isLinkedList(node) {
   }
 }
 
-
+/**
+ * 绘制树
+ * @param node
+ * @param x
+ * @param y
+ * @param color
+ */
 function render(node, x, y, color = false) {
   if (node == null) {
     return;
@@ -504,46 +389,6 @@ function render(node, x, y, color = false) {
   ctx.fillText(node.value.toString(), x, y);
 }
 
-function render2(node, x, y, color = false) {
-  if (node == null) {
-    return;
-  }
-  if (node.left != null) {
-    let offset = node.left.width / 2;
-    let lx = x - node.offset;
-    let ly = y + height;
-    ctx2.beginPath();
-    ctx2.moveTo(x, y);
-    ctx2.lineTo(lx, ly);
-    ctx2.stroke();
-    render2(node.left, lx, ly, color);
-  }
-  if (node.right != null) {
-    let offset = node.right.width / 2;
-    let rx = x + node.offset;
-    let ry = y + height;
-    ctx2.beginPath();
-    ctx2.moveTo(x, y);
-    ctx2.lineTo(rx, ry);
-    ctx2.stroke();
-    render2(node.right, rx, ry, color);
-  }
-  ctx2.beginPath();
-  ctx2.arc(x, y, radius, 0, 2 * Math.PI)
-  ctx2.closePath();
-  if (color) {
-    ctx2.fillStyle = node.color === RED ? 'red' : 'black';
-    ctx2.fill('nonzero');
-    ctx2.fillStyle = 'white';
-  } else {
-    ctx2.fillStyle = 'white';
-    ctx2.fill('nonzero');
-    ctx2.fillStyle = 'red';
-  }
-  ctx2.stroke();
-  ctx2.fillText(node.value.toString(), x, y);
-}
-
 /**
  * 生成一颗随机二叉树
  */
@@ -559,14 +404,13 @@ function randomBiTree() {
       array[i] = "null";
     }
   }
-  // 1,1,2,3,4,5,6,null,null,9,10,null,12,13,14,15,16,17,18,null,20,21,22,23,24,null,26,27,28,29,30,null,32,33,34,35,36,37,null,39,40,41,42,43,44,45,46,47,48,49,50,null,52,53,54,55,56,57,58,59,60,61,null,63,64,null,null,67,68,69,70,71,72,73,74,75,76,77,78,79,null,81,82,null,84,85,86,87,88,89,90,null,92,null,94,95,96,97,98,null,null,101,102,103,104,105,null,null,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,128,129,130,131,132,133,null,135,136,137,null,139,140,141,142,143,144,145,146,147,148,149,150,null,152,153,154,155,156,157,158,159,160,161,162,163,164,165,null,167,168,169,170,171,172,173,174,175,176,177,178,179,180,181,182,183,184,185,186,187,188,189,190,191,192,193,194,195,null,197,198,199,200,201,202,203,204,205,206,207,208,209,210,211,212,null,214,215,null,217,null,219,220,221,null,223,224,225,226,227,null,229,230,231,232,233,234,null,null,237,238,239,240,241,242,null,244,245,246,247,248,249,null,251,null,null,254,null,null,257,258,259,260,null,262,263,264,265,null,267,268,269,null,null,null,null,null,275,276,277,278,279,280,281,282,null,284,285,286,287,288,289,290,291,292,293,294,295,296,297,298,299
   let input = document.getElementById('inputBiTree');
   input.value = array.toString();
   generateBiTree();
 }
 
 function randomSet() {
-  let count = 200;
+  let count = 50;
   let array = new Array(count);
   let set = new Set();
   while (set.size < count) {

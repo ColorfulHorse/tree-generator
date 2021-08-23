@@ -232,7 +232,6 @@ var padding = 20;
 var root = null;
 var root2 = null;
 
-// var canvas = null;
 var ctx = null;
 var ctx2 = null;
 
@@ -349,7 +348,10 @@ function measure2(node) {
   // node.offset += spacing / 2;
 }
 
-
+/**
+ * 测量整个树宽度以及各节点位置
+ * @param node
+ */
 function measure(node) {
   mixTotal = 0;
   if (node == null) {
@@ -364,13 +366,6 @@ function measure(node) {
   // TODO 对比 leetcode [1,2,3,4,null,null,null,6,7,10,11,12,13,18,19,20,21,22,23,24,25]
   measure(node.left);
   measure(node.right);
-
-  // 记录该子树是否为单链表
-  // if (!node.right) {
-  //   node.isLinkedList = node.left.isLinkedList;
-  // } else if (!node.left) {
-  //   node.isLinkedList = node.right.isLinkedList;
-  // }
 
   // 左右子树宽度
   let leftWidth = getWidth(node.left);
